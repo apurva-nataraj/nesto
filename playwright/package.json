@@ -1,0 +1,21 @@
+{
+  "name": "nesto-signup-tests",
+  "version": "1.0.0",
+  "description": "Playwright + TypeScript suite for app.qa.nesto.ca/signup (EN and FR)",
+  "scripts": {
+    "test": "playwright test",
+    "test:en": "playwright test --project=chromium-en",
+    "test:fr": "playwright test --project=chromium-fr",
+    "test:headed": "playwright test --headed",
+    "run:e2e:ui": "playwright test --ui",
+    "report": "playwright show-report",
+    "typecheck": "tsc --noEmit"
+  },
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.3",
+    "typescript": "^5.6.0"
+  }
+}
