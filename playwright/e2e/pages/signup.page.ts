@@ -1,5 +1,15 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 import type { Locale, SignupCopy } from "../locatorTextCopy/signup.copy";
+import type { SignupUser } from "../data/signup.data";
+
+type SignupField =
+  | "first-name"
+  | "last-name"
+  | "phone"
+  | "region"
+  | "email"
+  | "password"
+  | "passwordConfirmation";
 
 export class SignupPage {
   readonly firstName: Locator;
@@ -61,5 +71,27 @@ export class SignupPage {
     await expect(this.submitButton).toBeVisible();
     // The province of purchase is rendered asynchronously; wait until it settles.
     await expect(this.region).not.toHaveValue("");
+  }
+  
+  async fill(user: SignupUser) {
+    await this.firstName.fill(user.firstName);
+    await this.lastName.fill(user.lastName);
+    await this.phone.fill(user.phone);
+    await this.region.selectOption(user.region);
+    await this.email.fill(user.email);
+    await this.password.fill(user.password);
+    await this.passwordConfirmation.fill(user.passwordConfirmation);
+    await this.partnerConsent.setChecked(user.partnerConsent);
+  }
+
+  // Clicks submit and resolves with the account-creation response.
+  async submitAndWaitForAccount() {
+    const responsePromise = this.page.waitForResponse(
+      (r) =>
+        r.request().method() === "POST" &&
+        new URL(r.url()).pathname === "/api/accounts",
+    );
+    await this.submitButton.click();
+    return responsePromise;
   }
 }
