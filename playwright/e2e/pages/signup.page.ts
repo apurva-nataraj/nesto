@@ -72,7 +72,18 @@ export class SignupPage {
     // The province of purchase is rendered asynchronously; wait until it settles.
     await expect(this.region).not.toHaveValue("");
   }
-  
+
+  // Logs out (a successful signup logs the browser in) and reopens an empty signup form.
+  async startOver() {
+    await this.page.goto("about:blank");
+    await this.page.context().clearCookies();
+    await this.goto();
+  }
+
+  error(field: SignupField) {
+    return this.page.getByTestId(`${field}-error-message-typography`);
+  }
+
   async fill(user: SignupUser) {
     await this.firstName.fill(user.firstName);
     await this.lastName.fill(user.lastName);
@@ -84,6 +95,10 @@ export class SignupPage {
     await this.partnerConsent.setChecked(user.partnerConsent);
   }
 
+  async submit() {
+    await this.submitButton.click();
+  }
+
   // Clicks submit and resolves with the account-creation response.
   async submitAndWaitForAccount() {
     const responsePromise = this.page.waitForResponse(
@@ -91,7 +106,7 @@ export class SignupPage {
         r.request().method() === "POST" &&
         new URL(r.url()).pathname === "/api/accounts",
     );
-    await this.submitButton.click();
+    await this.submit();
     return responsePromise;
   }
 }
