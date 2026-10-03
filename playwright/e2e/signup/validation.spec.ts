@@ -7,7 +7,7 @@ import {
   INVALID_PASSWORDS,
 } from "../data/invalid-inputs";
 
-test.describe("Signup page: negative validation", () => {
+test.describe("Signup page: validation", () => {
   // Submitting an otherwise valid form with one bad value must show that field's error and never hit the API.
   for (const [title, cases] of [
     ["names", INVALID_NAMES],
@@ -74,5 +74,38 @@ test.describe("Signup page: negative validation", () => {
     });
 
     expect(requests.count(), "no account request should be sent").toBe(0);
+  });
+
+  test("Multiple clicks of Submit button, and Enter key submission works", async ({
+    page,
+  }, testInfo) => {
+    const signupPage = await openSignup(page, testInfo);
+    // Double-clicking must not create two accounts; pressing Enter must submit like the button does.
+    await test.step("double-clicking submit sends a single request", async () => {
+      await signupPage.startOver();
+      const requests = signupPage.trackAccountRequests();
+      await signupPage.fill(buildUser());
+      const responsePromise = signupPage.page.waitForResponse(
+        (r) =>
+          r.request().method() === "POST" &&
+          new URL(r.url()).pathname === "/api/accounts",
+      );
+      await signupPage.submitButton.dblclick();
+      expect((await responsePromise).status()).toBe(201);
+      await signupPage.page.waitForTimeout(1_000);
+      expect(requests.count()).toBe(1);
+    });
+
+    await test.step("pressing Enter in a field submits the form", async () => {
+      await signupPage.startOver();
+      await signupPage.fill(buildUser());
+      const responsePromise = signupPage.page.waitForResponse(
+        (r) =>
+          r.request().method() === "POST" &&
+          new URL(r.url()).pathname === "/api/accounts",
+      );
+      await signupPage.email.press("Enter");
+      expect((await responsePromise).status()).toBe(201);
+    });
   });
 });
