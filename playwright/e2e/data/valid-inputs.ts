@@ -4,9 +4,9 @@ import { buildUser, type SignupUser } from "./signup.data";
 export type ValidEdgeCase = {
   name: string;
   user: SignupUser;
-  /** Extra fields that must appear on the POST body after a 201. */
+  // Extra fields that must appear on the POST body after a 201.
   request?: Record<string, unknown>;
-  /** Extra fields that must appear on the returned account after a 201. */
+  // Extra fields that must appear on the returned account after a 201.
   account?: Record<string, unknown>;
 };
 
@@ -55,7 +55,7 @@ export function validSignupEdgeCases(): ValidEdgeCase[] {
     {
       name: "partner consent left unchecked",
       user: { ...buildUser(), partnerConsent: false },
-      request: { consentAgreement: false },
+      request: { leadDistributeConsentAgreement: false },
     },
     {
       name: "non-default province",
