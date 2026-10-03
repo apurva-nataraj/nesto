@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { openSignup } from "../fixtures/signup";
 import {
+  accountPayload,
   buildUser,
   toE164,
 } from "../data/signup.data";
@@ -38,7 +39,7 @@ test.describe("Account API: through the signup form", () => {
         phone: toE164(user.phone),
         region: user.region,
         language: locale,
-        consentAgreement: user.partnerConsent,
+        leadDistributeConsentAgreement: user.partnerConsent,
       });
     });
 
@@ -100,6 +101,83 @@ test.describe("Account API: through the signup form", () => {
       const response = await signupPage.submitAndWaitForAccount();
       expect(response.status()).toBeLessThan(500);
       expect(response.ok()).toBe(false);
+    });
+  });
+});
+
+test.describe("Account API: direct calls (no UI)", () => {
+  test.beforeEach(({}, testInfo) => {
+    // The API is language-independent, so it runs once (English project) instead of once per language.
+    test.skip(
+      testInfo.project.name.endsWith("-fr"),
+      "language-independent, covered by the EN run",
+    );
+  });
+
+  test("API accepts valid data and rejects malformed requests", async ({
+    request,
+  }) => {
+    // Bypasses the form to check the contract the front end relies on, and that the API rejects bad input itself.
+    const user = buildUser();
+
+    await test.step("valid payload returns 201 with the account", async () => {
+      const response = await request.post("/api/accounts", {
+        data: accountPayload(user),
+      });
+      expect(response.status()).toBe(201);
+      const { account } = await response.json();
+      expect(account).toMatchObject({
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: toE164(user.phone),
+        region: user.region,
+        preferredLanguage: "en",
+      });
+      expect(JSON.stringify(account)).not.toContain(user.password);
+    });
+
+    await test.step("French is an accepted language", async () => {
+      const response = await request.post("/api/accounts", {
+        data: { ...accountPayload(), language: "fr" },
+      });
+      expect(response.status()).toBe(201);
+      expect((await response.json()).account.preferredLanguage).toBe("fr");
+    });
+
+    for (const [name, bad, parameter] of [
+      ["invalid email", { email: "not-an-email" }, "email"],
+      ["unknown region", { region: "ZZ" }, "region"],
+      ["unknown language", { language: "xx" }, "language"],
+    ] as const) {
+      await test.step(`${name} returns 422 naming the field`, async () => {
+        const response = await request.post("/api/accounts", {
+          data: { ...accountPayload(), ...bad },
+        });
+        expect(response.status()).toBe(422);
+        expect((await response.json()).parameters).toContain(parameter);
+      });
+    }
+
+    await test.step("password shorter than 12, longer than 32 or without a digit is refused", async () => {
+      for (const password of [
+        "Short1abcde",
+        "Aa1" + "x".repeat(30),
+        "NoNumbersHereAtAll",
+      ]) {
+        const response = await request.post("/api/accounts", {
+          data: { ...accountPayload(), password },
+        });
+        expect(response.ok(), `password "${password}"`).toBe(false);
+      }
+    });
+
+    await test.step("malformed JSON returns 400", async () => {
+      const response = await request.post("/api/accounts", {
+        data: "{not json",
+        headers: { "content-type": "application/json" },
+      });
+      expect(response.status()).toBe(400);
     });
   });
 });
