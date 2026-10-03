@@ -109,4 +109,17 @@ export class SignupPage {
     await this.submit();
     return responsePromise;
   }
+
+  // True if the app fired an account-creation request. Used to prove invalid forms are blocked client-side.
+  trackAccountRequests(): { count: () => number } {
+    let n = 0;
+    this.page.on("request", (r) => {
+      if (
+        r.method() === "POST" &&
+        new URL(r.url()).pathname === "/api/accounts"
+      )
+        n += 1;
+    });
+    return { count: () => n };
+  }
 }
