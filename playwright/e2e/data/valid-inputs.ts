@@ -29,6 +29,14 @@ export function validSignupEdgeCases(): ValidEdgeCase[] {
       },
     },
     {
+      name: "password containing spaces",
+      user: {
+        ...buildUser(),
+        password: "Valid Pass 12345",
+        passwordConfirmation: "Valid Pass 12345",
+      },
+    },
+    {
       name: "hyphenated and accented names",
       user: {
         ...buildUser(),
