@@ -11,37 +11,28 @@ Companion notes (not required to run the suite):
 - [Assumptions.md](./Assumptions.md) — inferred product rules, API contract, and what is out of scope
 - [Bug_Report.md](./Bug_Report.md) — defects found during QA and how (or whether) the suite tracks them
 
-
-
 ## Setup
 
 ```bash
-npm install
-npm install -g yarn
-npx playwright install
-
-## Run test suite
-`yarn run:e2e:ui`
-
-## Command line arguments
-`--workers=8`
+yarn install
+yarn playwright install
 ```
 
-Default `baseURL` is `https://app.qa.nesto.ca`. Override with `BASE_URL` if needed. Do not point this suite at production: it writes real accounts.
+Pass extra Playwright flags after the script, for example `yarn test --workers=8`.
+
+Default `baseURL` is `https://app.qa.nesto.ca`. Do not point this suite at production as it writes real accounts.
 
 ## Run
 
 ```bash
-npm test            # both languages
-npm run test:en     # English only  (project chromium-en, /signup)
-npm run test:fr     # French only   (project chromium-fr, /fr/signup)
-npm run test:headed # headed browser
-npm run run:e2e:ui  # Playwright UI
-npm run report      # last HTML report
-npm run typecheck
+yarn test            # both languages
+yarn test:en         # English only  (project chromium-en, /signup)
+yarn test:fr         # French only   (project chromium-fr, /fr/signup)
+yarn test:headed     # headed browser
+yarn run:e2e:ui      # Playwright UI
+yarn report          # last HTML report
+yarn typecheck
 ```
-
-
 
 ## Layout
 
