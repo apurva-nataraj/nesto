@@ -177,12 +177,12 @@ test.describe("Account API: direct calls (no UI)", () => {
     });
   });
 
-  // Known server-side gaps (BUG-11 to BUG-13). test.fail() keeps the suite green while they exist and turns it red
+  // Known server-side gaps (BUG-10 to BUG-12). test.fail() keeps the suite green while they exist and turns it red
   // as soon as every one is fixed, which is the prompt to delete this marker and promote the checks to regular tests.
   test("API enforces the same rules as the form", async ({ request }) => {
     test.fail(
       true,
-      "BUG-11, BUG-12 and BUG-13: server-side validation is weaker than the form",
+      "BUG-10, BUG-11 and BUG-12: server-side validation is weaker than the form",
     );
 
     await test.step("password without an uppercase or lowercase letter is refused", async () => {

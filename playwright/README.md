@@ -63,7 +63,7 @@ A successful signup logs the browser in and disables the form. Tests that create
 
 **api (form, EN and FR)** — 201 with echoed name, email, E.164 phone, region, and language; password not returned. Edge cases and duplicate email (400, stays on `/signup`).
 
-**api (direct, English project)** — contract checks (201, 422, 400). BUG-11, 12 and 13 (API weaker than the form) use `test.fail()` so the suite stays green until the server catches up.
+**api (direct, English project)** — contract checks (201, 422, 400). BUG-10, 11 and 12 (API weaker than the form) use `test.fail()` so the suite stays green until the server catches up.
 
 Other bugs live in `Bug_Report.md`.
 
