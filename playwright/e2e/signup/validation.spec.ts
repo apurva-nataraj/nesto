@@ -92,7 +92,7 @@ test.describe("Signup page: validation", () => {
       );
       await signupPage.submitButton.dblclick();
       expect((await responsePromise).status()).toBe(201);
-      await signupPage.page.waitForTimeout(1_000);
+      await expect(signupPage.page).not.toHaveURL(/\/signup/);
       expect(requests.count()).toBe(1);
     });
 

@@ -67,7 +67,10 @@ export class SignupPage {
   }
 
   async goto() {
-    await this.page.goto(`${this.copy.urlPrefix}/signup`);
+    // domcontentloaded: the page loads many third-party scripts; we only need the form.
+    await this.page.goto(`${this.copy.urlPrefix}/signup`, {
+      waitUntil: "domcontentloaded",
+    });
     await expect(this.submitButton).toBeVisible();
     // The province of purchase is rendered asynchronously; wait until it settles.
     await expect(this.region).not.toHaveValue("");
@@ -75,7 +78,6 @@ export class SignupPage {
 
   // Logs out (a successful signup logs the browser in) and reopens an empty signup form.
   async startOver() {
-    await this.page.goto("about:blank");
     await this.page.context().clearCookies();
     await this.goto();
   }
