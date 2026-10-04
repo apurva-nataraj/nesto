@@ -1,10 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { openSignup } from "../fixtures/signup";
-import {
-  accountPayload,
-  buildUser,
-  toE164,
-} from "../data/signup.data";
+import { accountPayload, buildUser, toE164 } from "../data/signup.data";
 import { validSignupEdgeCases } from "../data/valid-inputs";
 
 // Everything about POST /api/accounts lives in this file.
@@ -58,7 +54,7 @@ test.describe("Account API: through the signup form", () => {
     });
   });
 
-  test("accepts valid edge-case inputs", async ({ page }, testInfo) => {
+  test("Accepts valid edge-case inputs", async ({ page }, testInfo) => {
     const signupPage = await openSignup(page, testInfo);
     // Boundary and special-character inputs that must still succeed; each gets a clean session.
     for (const c of validSignupEdgeCases()) {
@@ -77,7 +73,7 @@ test.describe("Account API: through the signup form", () => {
     }
   });
 
-  test("rejects a duplicate email", async ({ page }, testInfo) => {
+  test("Rejects a duplicate email", async ({ page }, testInfo) => {
     const signupPage = await openSignup(page, testInfo);
     // The same email cannot register twice; the second attempt fails and the user stays on the form.
     const email = buildUser().email;
@@ -178,6 +174,47 @@ test.describe("Account API: direct calls (no UI)", () => {
         headers: { "content-type": "application/json" },
       });
       expect(response.status()).toBe(400);
+    });
+  });
+
+  test("API enforces the same rules as the UI form", async ({ request }) => {
+    await test.step("password without an uppercase or lowercase letter is refused", async () => {
+      for (const password of ["alllowercase123", "ALLUPPERCASE123"]) {
+        const response = await request.post("/api/accounts", {
+          data: { ...accountPayload(), password },
+        });
+        expect
+          .soft(response.ok(), `password "${password}" should be refused`)
+          .toBe(false);
+      }
+    });
+
+    await test.step("missing or invalid names are refused", async () => {
+      for (const body of [
+        { firstName: "" },
+        { lastName: "" },
+        { firstName: "12345" },
+        { firstName: "<b>Odd Name</b>" },
+      ]) {
+        const response = await request.post("/api/accounts", {
+          data: { ...accountPayload(), ...body },
+        });
+        expect
+          .soft(response.ok(), `${JSON.stringify(body)} should be refused`)
+          .toBe(false);
+      }
+    });
+
+    await test.step("invalid phone is refused", async () => {
+      const response = await request.post("/api/accounts", {
+        data: { ...accountPayload(), phone: "123" },
+      });
+      expect.soft(response.ok(), "phone 123 should be refused").toBe(false);
+    });
+
+    await test.step("empty body is a client error, not a 500", async () => {
+      const response = await request.post("/api/accounts", { data: {} });
+      expect.soft(response.status(), "empty body").toBeLessThan(500);
     });
   });
 });
