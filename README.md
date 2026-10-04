@@ -6,9 +6,3 @@ Requirements: Node.js 18+ and yarn.
 npm install -g yarn
 npm init playwright@latest
 ```
-
-## Run test suite
-`yarn run:e2e:ui`
-
-## Command line arguments
-`--workers=8`
