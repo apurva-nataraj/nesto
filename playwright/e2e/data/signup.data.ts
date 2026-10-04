@@ -9,8 +9,8 @@ export function uniqueEmail(prefix = "qa"): string {
 export function buildUser() {
   const password = VALID_PASSWORD;
   return {
-    firstName: "Apurva",
-    lastName: "Nataraj",
+    firstName: "Test",
+    lastName: "User",
     phone: "9055555555",
     region: "ON",
     email: uniqueEmail(),
